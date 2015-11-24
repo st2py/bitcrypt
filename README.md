@@ -11,6 +11,11 @@ It is developed by using Golang, supports **Linux**, **Windows**, **OSX**, **Fre
 
 For more details, please go to the project page [http://blog.st2py.com/en/bitcrypt/](http://blog.st2py.com/en/bitcrypt/)
 
+## Project License
+
+The MIT License (MIT)
+Copyright (c) 2015 St2Py
+
 
 ## 关于 BitCrypt
 
@@ -19,3 +24,8 @@ For more details, please go to the project page [http://blog.st2py.com/en/bitcry
 它使用Go语言开发，支持 **Linux**，**Windows**，**OSX**，**FreeBSD** 四大主流操作系统。
 
 更多详情，请移步项目中文主页 [http://blog.st2py.com/cn/bitcrypt/](http://blog.st2py.com/cn/bitcrypt/)
+
+## 项目许可
+
+The MIT License (MIT)
+Copyright (c) 2015 St2Py
