@@ -14,6 +14,7 @@ For more details, please go to the project page [http://blog.st2py.com/en/bitcry
 ## Project License
 
 The MIT License (MIT)
+
 Copyright (c) 2015 St2Py
 
 
@@ -28,4 +29,5 @@ Copyright (c) 2015 St2Py
 ## 项目许可
 
 The MIT License (MIT)
+
 Copyright (c) 2015 St2Py
