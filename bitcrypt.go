@@ -67,6 +67,8 @@ func main() {
 			log.Fatal("Error: generate RSA key failed")
 		}
 		log.Println("Generate RSA key OK")
+		log.Println("Please backup your RSA key files carefully")
+		log.Println("If RSA key files are lost, all encrypted files cannot be decrypted")
 	} else if encFile == true || decFile == true {
 		if keyFile == "" {
 			if encFile == true {
