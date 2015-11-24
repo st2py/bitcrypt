@@ -63,6 +63,7 @@ func main() {
 		log.Println("Directory at", keyPath)
 		err = RsaGenKey(keyPath, bits)
 		if err != nil {
+			log.Println(err.Error())
 			log.Fatal("Error: generate RSA key failed")
 		}
 		log.Println("Generate RSA key OK")

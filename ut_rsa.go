@@ -29,14 +29,14 @@ func RsaReadKey(keyName string) []byte {
 func RsaGenKey(filePath string, bits int) error {
 
 	if !IsDirExist(filePath) {
-		os.Mkdir(filePath, 0600)
+		os.Mkdir(filePath, 0700)
 	}
 
 	privPath := filepath.Join(filePath, "private.pem")
 	pubfPath := filepath.Join(filePath, "public.pem")
 	if IsFileExist(privPath) || IsFileExist(pubfPath) {
-		log.Fatal("Error: RSA key files already exist at: ", filePath)
-		return nil
+		log.Println("Error: files already exist at:", filePath)
+		return errors.New("RSA key files already exist")
 	}
 
 	// Gen private key
@@ -51,15 +51,17 @@ func RsaGenKey(filePath string, bits int) error {
 	}
 	file, err := os.Create(privPath)
 	if err != nil {
-		log.Fatal("Error: create ", privPath, " failed")
+		log.Println("Error: create ", privPath, " failed")
 		return err
 	}
+	defer file.Close()
 
-	file.Chmod(0600)
 	err = pem.Encode(file, block)
 	if err != nil {
 		return err
 	}
+	file.Chmod(0400)
+
 	// Gen public key
 	publicKey := &privateKey.PublicKey
 	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
@@ -72,15 +74,16 @@ func RsaGenKey(filePath string, bits int) error {
 	}
 	file, err = os.Create(pubfPath)
 	if err != nil {
-		log.Fatal("Error: create ", pubfPath, " failed")
+		log.Println("Error: create ", pubfPath, " failed")
 		return err
 	}
+	defer file.Close()
 
-	file.Chmod(0600)
 	err = pem.Encode(file, block)
 	if err != nil {
 		return err
 	}
+	file.Chmod(0400)
 	return nil
 }
 
