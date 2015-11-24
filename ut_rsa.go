@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 )
 
-// 读取
+// Read RSA key file
 func RsaReadKey(keyName string) []byte {
 	key, err := ioutil.ReadFile(keyName)
 	if err != nil {
@@ -25,7 +25,7 @@ func RsaReadKey(keyName string) []byte {
 	return key
 }
 
-// 生成
+// Gen RSA key pair
 func RsaGenKey(filePath string, bits int) error {
 
 	if !IsDirExist(filePath) {
@@ -39,7 +39,7 @@ func RsaGenKey(filePath string, bits int) error {
 		return nil
 	}
 
-	// 生成私钥文件
+	// Gen private key
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func RsaGenKey(filePath string, bits int) error {
 	if err != nil {
 		return err
 	}
-	// 生成公钥文件
+	// Gen public key
 	publicKey := &privateKey.PublicKey
 	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
 	if err != nil {
@@ -84,7 +84,7 @@ func RsaGenKey(filePath string, bits int) error {
 	return nil
 }
 
-// 加密
+// RSA encrypt
 func RsaEncrypt(publicKey []byte, origData []byte) ([]byte, error) {
 	block, _ := pem.Decode(publicKey)
 	if block == nil {
@@ -109,7 +109,7 @@ func RsaEncrypt(publicKey []byte, origData []byte) ([]byte, error) {
 	}
 }
 
-// 解密
+// RSA decrypt
 func RsaDecrypt(privateKey []byte, ciphertext []byte) ([]byte, error) {
 	block, _ := pem.Decode(privateKey)
 	if block == nil {
