@@ -16,7 +16,7 @@ func main() {
 	var bits int
 	flag.IntVar(&bits, "b", 2048, "RSA key length, only valid for 1024, 2048, 4096")
 	var keyPath string
-	flag.StringVar(&keyPath, "p", "keys", "RSA key files directory path")
+	flag.StringVar(&keyPath, "p", "", "RSA key files directory path")
 
 	var encFile bool
 	flag.BoolVar(&encFile, "e", false, "Encrypt file")
