@@ -44,6 +44,10 @@ func EncryptDir(srcDir string, rsaPubKey []byte, aesBits int, aesCtp string) err
 		}
 
 		encPath := filepath.Join(dstDir, relPath)
+		if strings.Contains(encPath, ".git") || strings.Contains(encPath, ".svn") {
+			return nil
+		}
+
 		if f.IsDir() {
 			if !IsDirExist(encPath) {
 				mode := f.Mode().Perm()
