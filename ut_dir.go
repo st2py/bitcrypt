@@ -97,6 +97,10 @@ func DecryptDir(srcDir string, rsaPriKey []byte) error {
 		}
 
 		decPath := filepath.Join(dstDir, relPath)
+		if strings.Contains(decPath, ".git") || strings.Contains(decPath, ".svn") {
+			return nil
+		}
+
 		if f.IsDir() {
 			if !IsDirExist(decPath) {
 				mode := f.Mode().Perm()
