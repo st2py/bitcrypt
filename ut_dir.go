@@ -44,11 +44,10 @@ func EncryptDir(srcDir string, rsaPubKey []byte, aesBits int, aesCtp string) err
 		}
 
 		encPath := filepath.Join(dstDir, relPath)
-		if strings.Contains(encPath, ".git") || strings.Contains(encPath, ".svn") {
-			return nil
-		}
-
 		if f.IsDir() {
+			if strings.Contains(encPath, ".git") || strings.Contains(encPath, ".svn") {
+				return filepath.SkipDir
+			}
 			if !IsDirExist(encPath) {
 				mode := f.Mode().Perm()
 				//fmt.Println("Mode:", mode)
@@ -97,11 +96,11 @@ func DecryptDir(srcDir string, rsaPriKey []byte) error {
 		}
 
 		decPath := filepath.Join(dstDir, relPath)
-		if strings.Contains(decPath, ".git") || strings.Contains(decPath, ".svn") {
-			return nil
-		}
-
 		if f.IsDir() {
+			if strings.Contains(decPath, ".git") || strings.Contains(decPath, ".svn") {
+				return filepath.SkipDir
+			}
+
 			if !IsDirExist(decPath) {
 				mode := f.Mode().Perm()
 				//fmt.Println("Mode:", mode)
