@@ -63,6 +63,9 @@ func EncryptDir(srcDir string, rsaPubKey []byte, aesBits int, aesCtp string) err
 		if err != nil {
 			log.Println("Error for encryption:", path)
 			log.Println(err.Error())
+			if !strings.Contains(err.Error(), "not modified") {
+				return err
+			}
 		}
 		return nil
 	})
@@ -78,10 +81,9 @@ func DecryptDir(srcDir string, rsaPriKey []byte) error {
 	}
 
 	dstDir := srcDir
-	if strings.HasSuffix(dstDir, "_enc") == true {
+	if strings.HasSuffix(dstDir, "_enc") {
 		dstDir = strings.TrimSuffix(dstDir, "_enc")
 	}
-
 	//fmt.Println("srcDir:", srcDir)
 	//fmt.Println("dstDir:", dstDir)
 
@@ -100,7 +102,6 @@ func DecryptDir(srcDir string, rsaPriKey []byte) error {
 			if strings.Contains(decPath, ".git") || strings.Contains(decPath, ".svn") {
 				return filepath.SkipDir
 			}
-
 			if !IsDirExist(decPath) {
 				mode := f.Mode().Perm()
 				//fmt.Println("Mode:", mode)
@@ -119,6 +120,10 @@ func DecryptDir(srcDir string, rsaPriKey []byte) error {
 		if err != nil {
 			log.Println("Error for decryption:", path)
 			log.Println(err.Error())
+			if !strings.Contains(err.Error(), "not modified") &&
+				!strings.Contains(err.Error(), "not an encrypted file") {
+				return err
+			}
 		}
 		return nil
 	})

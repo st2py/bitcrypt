@@ -285,7 +285,7 @@ func DecryptFile(inPath, outPath string, rsaPriKey []byte) error {
 	defer inFile.Close()
 
 	if hdrf.Eflg != 0x32571235 {
-		return errors.New("not a encrypted file error")
+		return errors.New("not an encrypted file error")
 	}
 
 	if IsFileExist(outPath) && !IsNewDec(outPath, hdrf) {
