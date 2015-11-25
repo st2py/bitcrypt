@@ -157,60 +157,75 @@ func GenEncHdr(inFile *os.File, aesBits int, aesCtp string) (*HdrInfo, *AesInfo)
 	return hdrf, info
 }
 
-func ReadHdrInfo(inPath string) (*HdrInfo, *os.File, error) {
+func ReadHdrInfo(inPath string) (*HdrInfo, error) {
 	inFile, err := os.Open(inPath)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
+	defer inFile.Close()
 
 	inInfo, err := inFile.Stat()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if inInfo.Size() < int64(160) {
-		return nil, nil, errors.New("not an encrypted file error")
+		return nil, errors.New("not an encrypted file error")
 	}
 
 	var buf = make([]byte, binary.Size(HdrInfo{}))
 	_, err = inFile.Read(buf)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	hdrf := Bytes2HdrInfo(buf)
-	return hdrf, inFile, nil
+	if hdrf.Eflg != 0x32571235 {
+		return nil, errors.New("not an encrypted file error")
+	}
+	return hdrf, nil
 }
 
-func ReadEncHdr(inPath string, rsaPriKey []byte) (*HdrInfo, *AesInfo, *os.File, error) {
-	hdrf, inFile, err := ReadHdrInfo(inPath)
+func ReadEncHdr(inPath string, rsaPriKey []byte) (*HdrInfo, *AesInfo, error) {
+	hdrf, err := ReadHdrInfo(inPath)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
+	}
+
+	inFile, err := os.Open(inPath)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer inFile.Close()
+
+	_, err = inFile.Seek(int64(binary.Size(HdrInfo{})), 0)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	var rsaBin = make([]byte, hdrf.Rlen)
 	_, err = inFile.Read(rsaBin)
 	if err != nil {
-		return nil, nil, nil, errors.New("read rsa bin failed")
+		return nil, nil, errors.New("read rsa bin failed")
 	}
 
 	binInfo, err := RsaDecrypt(rsaPriKey, rsaBin)
 	if binInfo == nil {
-		return nil, nil, nil, errors.New("decrypt rsa bin failed")
+		return nil, nil, errors.New("decrypt rsa bin failed")
 	}
 
 	info := Bytes2AesInfo(binInfo)
 	if CheckFchk(hdrf.Fchk[:], info.Fchk[:]) != true {
-		return nil, nil, nil, errors.New("header checksum failed")
+		return nil, nil, errors.New("header checksum failed")
 	}
 
 	//fmt.Println("binInfo len:", len(binInfo))
 	//fmt.Println("binInfo:", hex.EncodeToString(binInfo))
 
-	return hdrf, info, inFile, nil
+	return hdrf, info, nil
 }
 
 func IsNewEnc(inPath string, info *HdrInfo) bool {
-	hdrf, _, err := ReadHdrInfo(inPath)
+	hdrf, err := ReadHdrInfo(inPath)
 	if err != nil {
 		return true
 	}
@@ -282,19 +297,31 @@ func EncryptFile(inPath, outPath string, rsaPubKey []byte, aesBits int, aesCtp s
 
 	key := info.Aesk[:info.Size]
 	aiv := info.Aesv[:aes.BlockSize]
-	return AesEncryptFd(inFile, outFile, key, aiv, int(info.Type))
+	err = AesEncryptFd(inFile, outFile, key, aiv, int(info.Type))
+	if err != nil {
+		return err
+	}
+
+	inInfo, err := inFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	outFile.Chmod(inInfo.Mode())
+	return nil
 }
 
 func DecryptFile(inPath, outPath string, rsaPriKey []byte) error {
-	hdrf, info, inFile, err := ReadEncHdr(inPath, rsaPriKey)
+	hdrf, info, err := ReadEncHdr(inPath, rsaPriKey)
+	if err != nil {
+		return err
+	}
+
+	inFile, err := os.Open(inPath)
 	if err != nil {
 		return err
 	}
 	defer inFile.Close()
-
-	if hdrf.Eflg != 0x32571235 {
-		return errors.New("not an encrypted file error")
-	}
 
 	if IsFileExist(outPath) && !IsNewDec(outPath, hdrf) {
 		return errors.New("file already decrypted and not modified")
@@ -320,7 +347,14 @@ func DecryptFile(inPath, outPath string, rsaPriKey []byte) error {
 		return err
 	}
 
+	inInfo, err := inFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	outFile.Chmod(inInfo.Mode())
 	outFile.Close()
+
 	if IsNewDec(outPath2, hdrf) {
 		return errors.New("decrypted file checksum not match")
 	} else {
