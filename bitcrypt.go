@@ -104,8 +104,10 @@ func main() {
 			aesCpt = "cfb"
 		}
 
+		isDirFlag := false
 		if encFile == true {
 			if IsDirExist(inPath) {
+				isDirFlag = true
 				err = EncryptDir(inPath, bKey, aesLen, aesCpt)
 			} else {
 				outPath := inPath + ".enc"
@@ -114,10 +116,17 @@ func main() {
 
 			if err != nil {
 				log.Println(err.Error())
-				log.Fatal("Error: encrypt file ", inPath, " failed")
+				log.Fatal("Error: encrypt ", inPath, " failed")
+			} else {
+				if isDirFlag == true {
+					log.Println("Encrypt directory", inPath, "OK")
+				} else {
+					log.Println("Encrypt file", inPath, "OK")
+				}
 			}
 		} else {
 			if IsDirExist(inPath) {
+				isDirFlag = true
 				err = DecryptDir(inPath, bKey)
 			} else {
 				outPath := inPath
@@ -126,9 +135,16 @@ func main() {
 				}
 				err = DecryptFile(inPath, outPath, bKey)
 			}
+
 			if err != nil {
 				log.Println(err.Error())
-				log.Fatal("Error: decrypt file ", inPath, " failed")
+				log.Fatal("Error: decrypt ", inPath, " failed")
+			} else {
+				if isDirFlag == true {
+					log.Println("Decrypt directory", inPath, "OK")
+				} else {
+					log.Println("Decrypt file", inPath, "OK")
+				}
 			}
 		}
 	} else {
