@@ -163,6 +163,14 @@ func ReadHdrInfo(inPath string) (*HdrInfo, *os.File, error) {
 		return nil, nil, err
 	}
 
+	inInfo, err := inFile.Stat()
+	if err != nil {
+		return nil, nil, err
+	}
+	if inInfo.Size() < int64(160) {
+		return nil, nil, errors.New("not an encrypted file error")
+	}
+
 	var buf = make([]byte, binary.Size(HdrInfo{}))
 	_, err = inFile.Read(buf)
 	if err != nil {
